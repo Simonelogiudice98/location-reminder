@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=block" rel="stylesheet">
+</helmet>
+<div style="position:absolute;inset:0;font-family:Roboto,sans-serif;z-index:20">
+  <!-- scrim -->
+  <div onClick="{{ onClose }}" style="{{ scrimStyle }}"></div>
+  <!-- sheet -->
+  <div style="{{ sheetStyle }}">
+    <div style="display:flex;justify-content:center;padding:10px 0 4px">
+      <div style="width:36px;height:4px;border-radius:2px;background:#D5D8D6"></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 20px 4px">
+      <div style="font-size:20px;font-weight:600;color:#212121">Nuovo promemoria</div>
+      <button onClick="{{ onClose }}" style="width:36px;height:36px;border-radius:50%;border:none;background:#F0F2F1;display:flex;align-items:center;justify-content:center;cursor:pointer">
+        <span style="font-family:'Material Symbols Outlined';font-size:22px;line-height:1;color:#5F6562">close</span>
+      </button>
+    </div>
+
+    <div style="padding:8px 20px 24px;display:flex;flex-direction:column;gap:16px">
+      <!-- coordinates read-only -->
+      <div style="display:flex;align-items:center;gap:12px;background:#E0F2F1;border-radius:10px;padding:12px 14px">
+        <span style="font-family:'Material Symbols Outlined';font-size:22px;line-height:1;color:#00897B;font-variation-settings:'FILL' 1">place</span>
+        <div style="flex:1">
+          <div style="font-size:11px;font-weight:500;color:#00897B;letter-spacing:.3px">POSIZIONE DAL PIN</div>
+          <div style="font-size:14px;font-weight:500;color:#212121;margin-top:1px">{{ coords }}</div>
+        </div>
+        <span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:#9AA0A6">lock</span>
+      </div>
+
+      <!-- titolo -->
+      <div style="background:#F0F2F1;border-radius:8px 8px 0 0;border-bottom:2px solid #00897B;padding:8px 14px 10px">
+        <label style="display:block;font-size:12px;font-weight:500;color:#00897B">Titolo *</label>
+        <input value="{{ title }}" onInput="{{ onTitle }}" placeholder="Es. Comprare il latte" style="width:100%;border:none;background:transparent;outline:none;font-family:Roboto,sans-serif;font-size:16px;color:#212121;margin-top:3px;padding:0" />
+      </div>
+
+      <!-- descrizione -->
+      <div style="background:#F0F2F1;border-radius:8px 8px 0 0;border-bottom:2px solid #C4C9C7;padding:8px 14px 10px">
+        <label style="display:block;font-size:12px;font-weight:500;color:#757575">Descrizione (opzionale)</label>
+        <textarea value="{{ desc }}" onInput="{{ onDesc }}" placeholder="Aggiungi una nota..." rows="2" style="width:100%;border:none;background:transparent;outline:none;resize:none;font-family:Roboto,sans-serif;font-size:16px;color:#212121;margin-top:3px;padding:0"></textarea>
+      </div>
+
+      <!-- raggio slider -->
+      <div style="padding:2px 2px 0">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:#5F6562">adjust</span>
+            <span style="font-size:14px;font-weight:500;color:#212121">Raggio di attivazione</span>
+          </div>
+          <span style="font-size:15px;font-weight:600;color:#00897B">{{ radiusLabel }}</span>
+        </div>
+        <input type="range" min="50" max="1000" step="50" value="{{ radius }}" onInput="{{ onRadius }}" style="width:100%;accent-color:#00897B;cursor:pointer" />
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#9AA0A6;margin-top:2px">
+          <span>50 m</span><span>1 km</span>
+        </div>
+      </div>
+
+      <!-- save -->
+      <button onClick="{{ onSave }}" style="{{ saveStyle }}">
+        <span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1">check</span>Salva promemoria
+      </button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;open&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;},&quot;desc&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;},&quot;radius&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:200},&quot;coords&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;45.4642, 9.1900&quot;},&quot;onTitle&quot;:{&quot;editor&quot;:null},&quot;onDesc&quot;:{&quot;editor&quot;:null},&quot;onRadius&quot;:{&quot;editor&quot;:null},&quot;onSave&quot;:{&quot;editor&quot;:null},&quot;onClose&quot;:{&quot;editor&quot;:null}}">
+class Component extends DCLogic {
+  renderVals() {
+    const open = this.props.open ?? true;
+    const title = this.props.title ?? '';
+    const desc = this.props.desc ?? '';
+    const radius = this.props.radius ?? 200;
+    const canSave = String(title).trim().length > 0;
+    const scrimStyle = {
+      position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.42)',
+      opacity: open ? 1 : 0, transition: 'opacity .3s ease',
+      pointerEvents: open ? 'auto' : 'none'
+    };
+    const sheetStyle = {
+      position: 'absolute', left: 0, right: 0, bottom: 0,
+      background: '#FFFFFF', borderRadius: '20px 20px 0 0',
+      boxShadow: '0 -6px 24px rgba(0,0,0,0.18)',
+      transform: open ? 'translateY(0)' : 'translateY(102%)',
+      transition: 'transform .34s cubic-bezier(.2,.85,.25,1)'
+    };
+    const saveStyle = {
+      width: '100%', marginTop: '4px', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', gap: '8px',
+      background: canSave ? '#00897B' : '#BFC7C4',
+      color: '#fff', border: 'none', borderRadius: '12px',
+      padding: '15px', fontFamily: 'Roboto,sans-serif', fontSize: '15px',
+      fontWeight: 600, cursor: canSave ? 'pointer' : 'not-allowed',
+      boxShadow: canSave ? '0 3px 8px rgba(0,137,123,0.35)' : 'none',
+      transition: 'background .2s'
+    };
+    const radiusLabel = radius >= 1000 ? '1 km' : `${radius} m`;
+    return {
+      coords: this.props.coords ?? '45.4642, 9.1900',
+      title, desc, radius, radiusLabel, scrimStyle, sheetStyle, saveStyle,
+      onTitle: (e) => (this.props.onTitle || (()=>{}))(e.target.value),
+      onDesc: (e) => (this.props.onDesc || (()=>{}))(e.target.value),
+      onRadius: (e) => (this.props.onRadius || (()=>{}))(Number(e.target.value)),
+      onSave: () => { if (canSave) (this.props.onSave || (()=>{}))(); },
+      onClose: this.props.onClose || (() => {})
+    };
+  }
+}
+</script>
+</body>
+</html>

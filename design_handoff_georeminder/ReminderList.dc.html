@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=block" rel="stylesheet">
+</helmet>
+<div style="position:absolute;inset:0;overflow:hidden;background:#F5F5F5;font-family:Roboto,sans-serif;display:flex;flex-direction:column">
+  <!-- AppBar -->
+  <div style="background:#00897B;padding:48px 20px 16px;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.18);z-index:3">
+    <div style="height:0;display:flex;justify-content:space-between;align-items:center">
+      <div style="position:absolute;top:0;left:0;right:0;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;color:#fff">
+        <span style="font-size:15px;font-weight:600;letter-spacing:.3px">9:41</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1;font-variation-settings:'FILL' 1">signal_cellular_alt</span>
+          <span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1;font-variation-settings:'FILL' 1">wifi</span>
+          <span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;font-variation-settings:'FILL' 1">battery_full</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between">
+      <div>
+        <div style="font-size:22px;font-weight:600;letter-spacing:.2px">I miei Promemoria</div>
+        <div style="font-size:13px;font-weight:400;color:rgba(255,255,255,0.82);margin-top:3px">{{ countLabel }}</div>
+      </div>
+      <span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">tune</span>
+    </div>
+  </div>
+
+  <!-- list / empty -->
+  <div style="flex:1;overflow-y:auto;position:relative">
+    <sc-if value="{{ hasItems }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:12px;padding:16px 16px 84px">
+        <div style="font-size:12px;font-weight:600;color:#9AA0A6;letter-spacing:.4px;text-transform:uppercase;padding:4px 2px">Attivi</div>
+        <sc-for list="{{ items }}" as="item" hint-placeholder-count="3">
+          <dc-import name="ReminderCard" title="{{ item.title }}" radius="{{ item.radius }}" active="{{ item.active }}" on-toggle="{{ item.onToggle }}" on-edit="{{ item.onEdit }}" on-delete="{{ item.onDelete }}" hint-size="100%,76px"></dc-import>
+        </sc-for>
+        <div style="display:flex;align-items:center;gap:8px;justify-content:center;color:#B0B6BB;font-size:12px;padding:8px 0">
+          <span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1">swipe</span>
+          Scorri una card per modificarla o eliminarla
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 48px;text-align:center;gap:20px">
+        <div style="width:120px;height:120px;border-radius:50%;background:#E0F2F1;display:flex;align-items:center;justify-content:center">
+          <span style="font-family:'Material Symbols Outlined';font-size:60px;line-height:1;color:#4DB6AC;font-variation-settings:'FILL' 0">wrong_location</span>
+        </div>
+        <div style="font-size:17px;font-weight:600;color:#212121">Nessun promemoria ancora</div>
+        <div style="font-size:14px;font-weight:400;color:#757575;line-height:1.55;max-width:260px">Torna sulla mappa e tieni premuto per aggiungerne uno!</div>
+        <button onClick="{{ onTabMap }}" style="margin-top:4px;display:flex;align-items:center;gap:8px;background:#00897B;border:none;color:#fff;font-family:Roboto,sans-serif;font-size:14px;font-weight:600;padding:11px 20px;border-radius:22px;cursor:pointer;box-shadow:0 2px 6px rgba(0,137,123,0.35)">
+          <span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1">map</span>Vai alla mappa
+        </button>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- bottom nav -->
+  <div style="height:64px;display:flex;background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(0,0,0,0.06);z-index:5">
+    <button onClick="{{ onTabMap }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;font-family:Roboto,sans-serif;color:#757575">
+      <span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;font-variation-settings:'FILL' 0">map</span>
+      <span style="font-size:12px;font-weight:600">Mappa</span>
+    </button>
+    <button onClick="{{ onTabList }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;font-family:Roboto,sans-serif;color:#00897B">
+      <span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;font-variation-settings:'FILL' 1">format_list_bulleted</span>
+      <span style="font-size:12px;font-weight:600">Promemoria</span>
+    </button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;items&quot;:{&quot;editor&quot;:null},&quot;onTab&quot;:{&quot;editor&quot;:null},&quot;onToggle&quot;:{&quot;editor&quot;:null},&quot;onEdit&quot;:{&quot;editor&quot;:null},&quot;onDelete&quot;:{&quot;editor&quot;:null}}">
+class Component extends DCLogic {
+  renderVals() {
+    const raw = this.props.items ?? [
+      { id: 1, title: 'Comprare il latte', radius: 200, active: true },
+      { id: 2, title: 'Ritirare il pacco in posta', radius: 150, active: true },
+      { id: 3, title: 'Portare a spasso il cane', radius: 300, active: false }
+    ];
+    const onToggle = this.props.onToggle || (() => {});
+    const onEdit = this.props.onEdit || (() => {});
+    const onDelete = this.props.onDelete || (() => {});
+    const items = raw.map(it => ({
+      ...it,
+      onToggle: () => onToggle(it.id),
+      onEdit: () => onEdit(it.id),
+      onDelete: () => onDelete(it.id)
+    }));
+    const n = items.length;
+    return {
+      items,
+      hasItems: n > 0,
+      isEmpty: n === 0,
+      countLabel: n === 0 ? 'Nessun luogo salvato' : (n + (n === 1 ? ' luogo salvato' : ' luoghi salvati')),
+      onTabMap: () => (this.props.onTab || (()=>{}))('map'),
+      onTabList: () => (this.props.onTab || (()=>{}))('list')
+    };
+  }
+}
+</script>
+</body>
+</html>

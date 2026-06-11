@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=block" rel="stylesheet">
+</helmet>
+<div style="position:relative;border-radius:12px;overflow:hidden;user-select:none">
+  <!-- edit reveal (swipe right) -->
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-start;padding-left:22px;background:#00897B;border-radius:12px">
+    <button onClick="{{ onEdit }}" style="display:flex;align-items:center;gap:8px;background:none;border:none;color:#fff;font-family:Roboto,sans-serif;font-size:14px;font-weight:600;cursor:pointer">
+      <span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1">edit</span>Modifica
+    </button>
+  </div>
+  <!-- delete reveal (swipe left) -->
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end;padding-right:22px;background:#E5484D;border-radius:12px">
+    <button onClick="{{ onDelete }}" style="display:flex;align-items:center;gap:8px;background:none;border:none;color:#fff;font-family:Roboto,sans-serif;font-size:14px;font-weight:600;cursor:pointer">
+      <span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1">delete</span>Elimina
+    </button>
+  </div>
+  <!-- foreground -->
+  <div style="{{ fgStyle }}" onPointerDown="{{ onDown }}" onPointerMove="{{ onMove }}" onPointerUp="{{ onUp }}">
+    <div style="width:44px;height:44px;border-radius:50%;background:#E0F2F1;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;font-variation-settings:'FILL' 1;color:#00897B">location_on</span>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-family:Roboto,sans-serif;font-size:16px;font-weight:600;color:#212121;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ title }}</div>
+      <div style="font-family:Roboto,sans-serif;font-size:13px;font-weight:400;color:#757575;margin-top:2px">{{ subtitle }}</div>
+    </div>
+    <div onClick="{{ onToggle }}" onPointerDown="{{ stop }}" style="{{ trackStyle }}">
+      <div style="{{ thumbStyle }}"></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:360,&quot;height&quot;:80},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Comprare il latte&quot;},&quot;radius&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:200},&quot;active&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true},&quot;onToggle&quot;:{&quot;editor&quot;:null},&quot;onEdit&quot;:{&quot;editor&quot;:null},&quot;onDelete&quot;:{&quot;editor&quot;:null}}">
+class Component extends DCLogic {
+  state = { dx: 0, dragging: false, startX: 0, armed: null };
+
+  onDown = (e) => {
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    this.setState({ dragging: true, startX: e.clientX - this.state.dx });
+  };
+  onMove = (e) => {
+    if (!this.state.dragging) return;
+    let dx = e.clientX - this.state.startX;
+    dx = Math.max(-96, Math.min(96, dx));
+    this.setState({ dx });
+  };
+  onUp = () => {
+    const { dx } = this.state;
+    let armed = null, ndx = 0;
+    if (dx <= -54) { armed = 'delete'; ndx = -92; }
+    else if (dx >= 54) { armed = 'edit'; ndx = 92; }
+    this.setState({ dragging: false, dx: ndx, armed });
+  };
+  stop = (e) => { e.stopPropagation(); };
+
+  renderVals() {
+    const { dx, dragging } = this.state;
+    const active = this.props.active ?? true;
+    const radius = this.props.radius ?? 200;
+    const fgStyle = {
+      position: 'relative', display: 'flex', alignItems: 'center', gap: '14px',
+      padding: '16px', background: '#FFFFFF', borderRadius: '12px',
+      transform: `translateX(${dx}px)`,
+      transition: dragging ? 'none' : 'transform .28s cubic-bezier(.2,.8,.2,1)',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06)',
+      touchAction: 'pan-y', cursor: 'grab'
+    };
+    const trackStyle = {
+      width: '52px', height: '32px', borderRadius: '16px', flexShrink: 0,
+      background: active ? '#00897B' : '#E0E4E2',
+      border: active ? '2px solid #00897B' : '2px solid #9AA3A0',
+      position: 'relative', cursor: 'pointer',
+      transition: 'background .2s, border-color .2s', boxSizing: 'border-box'
+    };
+    const thumbStyle = {
+      position: 'absolute', top: '50%',
+      width: active ? '22px' : '16px', height: active ? '22px' : '16px',
+      borderRadius: '50%',
+      background: active ? '#FFFFFF' : '#8E9692',
+      left: active ? 'calc(100% - 24px)' : '6px',
+      transform: 'translateY(-50%)',
+      transition: 'left .2s cubic-bezier(.2,.8,.2,1), width .2s, height .2s, background .2s'
+    };
+    return {
+      title: this.props.title ?? 'Promemoria',
+      subtitle: `Raggio ${radius} m`,
+      fgStyle, trackStyle, thumbStyle,
+      onDown: this.onDown, onMove: this.onMove, onUp: this.onUp, stop: this.stop,
+      onToggle: this.props.onToggle || (() => {}),
+      onEdit: this.props.onEdit || (() => {}),
+      onDelete: this.props.onDelete || (() => {})
+    };
+  }
+}
+</script>
+</body>
+</html>

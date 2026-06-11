@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=block" rel="stylesheet">
+  <style>
+    @keyframes geo-ring { 0%,100%{box-shadow:0 0 0 9999px rgba(0,0,0,0.66),0 0 0 3px rgba(77,182,172,0.95),0 0 0 8px rgba(77,182,172,0.30)} 50%{box-shadow:0 0 0 9999px rgba(0,0,0,0.66),0 0 0 3px rgba(77,182,172,0.95),0 0 0 14px rgba(77,182,172,0.12)} }
+    @keyframes geo-cardin { 0%{transform:translateY(10px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+  </style>
+</helmet>
+<div style="position:absolute;inset:0;font-family:Roboto,sans-serif;z-index:40">
+  <!-- spotlight highlight -->
+  <div style="{{ hlStyle }}"></div>
+  <!-- coach card -->
+  <div style="{{ cardStyle }}">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <div style="width:30px;height:30px;border-radius:50%;background:#E0F2F1;display:flex;align-items:center;justify-content:center">
+        <span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1;color:#00897B;font-variation-settings:'FILL' 1">{{ stepIcon }}</span>
+      </div>
+      <span style="font-size:12px;font-weight:600;color:#00897B;letter-spacing:.3px">{{ stepLabel }}</span>
+    </div>
+    <div style="font-size:16px;font-weight:500;color:#212121;line-height:1.45">{{ text }}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px">
+      <div style="display:flex;gap:6px">
+        <div style="{{ dot0 }}"></div>
+        <div style="{{ dot1 }}"></div>
+        <div style="{{ dot2 }}"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <button onClick="{{ onSkip }}" style="background:none;border:none;color:#9AA0A6;font-family:Roboto,sans-serif;font-size:14px;font-weight:500;cursor:pointer;padding:6px 2px">Salta</button>
+        <button onClick="{{ onNext }}" style="display:flex;align-items:center;gap:6px;background:#00897B;border:none;color:#fff;font-family:Roboto,sans-serif;font-size:14px;font-weight:600;padding:10px 18px;border-radius:22px;cursor:pointer;box-shadow:0 2px 6px rgba(0,137,123,0.35)">
+          {{ nextLabel }}<span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1">{{ nextIcon }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;step&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:2},&quot;onNext&quot;:{&quot;editor&quot;:null},&quot;onSkip&quot;:{&quot;editor&quot;:null}}">
+class Component extends DCLogic {
+  renderVals() {
+    const step = Math.max(0, Math.min(2, this.props.step ?? 0));
+    const steps = [
+      { hl: { left: 38, top: 150, width: 314, height: 360, radius: 22 },
+        icon: 'touch_app', label: 'Suggerimento 1 di 3',
+        text: 'Tieni premuto sulla mappa per aggiungere un promemoria',
+        card: { left: '20px', right: '20px', top: '530px' } },
+      { hl: { left: 318, top: 700, width: 56, height: 56, radius: 28 },
+        icon: 'add_circle', label: 'Suggerimento 2 di 3',
+        text: 'Oppure usa il + per aggiungere rapidamente',
+        card: { left: '20px', right: '20px', bottom: '170px' } },
+      { hl: { left: 195, top: 780, width: 195, height: 64, radius: 14 },
+        icon: 'format_list_bulleted', label: 'Suggerimento 3 di 3',
+        text: 'Qui trovi e gestisci tutti i tuoi promemoria',
+        card: { left: '20px', right: '20px', bottom: '96px' } }
+    ];
+    const s = steps[step];
+    const hlStyle = {
+      position: 'absolute',
+      left: s.hl.left + 'px', top: s.hl.top + 'px',
+      width: s.hl.width + 'px', height: s.hl.height + 'px',
+      borderRadius: s.hl.radius + 'px', background: 'transparent',
+      animation: 'geo-ring 1.8s ease-in-out infinite', pointerEvents: 'none'
+    };
+    const cardStyle = {
+      position: 'absolute', ...s.card, background: '#FFFFFF',
+      borderRadius: '16px', padding: '18px', boxShadow: '0 8px 28px rgba(0,0,0,0.32)',
+      animation: 'geo-cardin .28s ease-out both'
+    };
+    const dot = (on) => ({
+      width: on ? '20px' : '8px', height: '8px', borderRadius: '4px',
+      background: on ? '#00897B' : '#D5D8D6', transition: 'all .25s'
+    });
+    return {
+      hlStyle, cardStyle,
+      stepIcon: s.icon, stepLabel: s.label, text: s.text,
+      dot0: dot(step === 0), dot1: dot(step === 1), dot2: dot(step === 2),
+      nextLabel: step === 2 ? 'Inizia' : 'Avanti',
+      nextIcon: step === 2 ? 'check' : 'arrow_forward',
+      onNext: this.props.onNext || (() => {}),
+      onSkip: this.props.onSkip || (() => {})
+    };
+  }
+}
+</script>
+</body>
+</html>

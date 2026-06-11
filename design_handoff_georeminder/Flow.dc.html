@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=block" rel="stylesheet">
+  <style>@keyframes geo-toast{0%{transform:translate(-50%,12px);opacity:0}100%{transform:translate(-50%,0);opacity:1}}</style>
+</helmet>
+<div style="display:flex;flex-direction:column;align-items:center;gap:22px;font-family:Roboto,sans-serif">
+  <!-- phone -->
+  <div style="position:relative;width:414px;height:868px;background:#0B0F0E;border-radius:56px;padding:12px;box-shadow:0 30px 60px rgba(0,0,0,0.32),0 0 0 2px rgba(255,255,255,0.04) inset">
+    <div style="position:relative;width:390px;height:844px;border-radius:44px;overflow:hidden;background:#E9ECEA">
+      <sc-if value="{{ mapScreen }}" hint-placeholder-val="{{ true }}">
+        <dc-import name="MapHome" fab-extended="{{ fabExtended }}" active-tab="map" on-fab="{{ openNew }}" on-tab="{{ goTab }}" on-long-press="{{ openNew }}" hint-size="390px,844px"></dc-import>
+      </sc-if>
+      <sc-if value="{{ listScreen }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="ReminderList" items="{{ reminders }}" on-tab="{{ goTab }}" on-toggle="{{ toggleR }}" on-edit="{{ openEdit }}" on-delete="{{ deleteR }}" hint-size="390px,844px"></dc-import>
+      </sc-if>
+
+      <!-- create sheet overlay (always mounted for animation) -->
+      <dc-import name="CreateSheet" open="{{ sheetOpen }}" title="{{ draftTitle }}" desc="{{ draftDesc }}" radius="{{ draftRadius }}" coords="{{ draftCoords }}" on-title="{{ setTitle }}" on-desc="{{ setDesc }}" on-radius="{{ setRadius }}" on-save="{{ saveR }}" on-close="{{ closeSheet }}" hint-size="390px,844px"></dc-import>
+
+      <!-- onboarding overlay -->
+      <sc-if value="{{ obActive }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="Onboarding" step="{{ obStep }}" on-next="{{ obNext }}" on-skip="{{ obSkip }}" hint-size="390px,844px"></dc-import>
+      </sc-if>
+
+      <!-- toast -->
+      <sc-if value="{{ showToast }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:50%;bottom:88px;transform:translateX(-50%);background:#2C322F;color:#fff;font-size:13px;font-weight:500;padding:11px 18px;border-radius:24px;display:flex;align-items:center;gap:8px;z-index:30;box-shadow:0 4px 14px rgba(0,0,0,0.3);white-space:nowrap;animation:geo-toast .25s ease-out both">
+          <span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1;color:#4DB6AC;font-variation-settings:'FILL' 1">check_circle</span>{{ toastMsg }}
+        </div>
+      </sc-if>
+
+      <!-- dynamic island -->
+      <div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:108px;height:30px;background:#0B0F0E;border-radius:16px;z-index:50"></div>
+    </div>
+  </div>
+
+  <!-- demo controls -->
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;max-width:430px">
+    <button onClick="{{ toggleFab }}" style="{{ fabChipStyle }}">
+      <span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1">label</span>{{ fabChipLabel }}
+    </button>
+    <button onClick="{{ restartTour }}" style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #D5D8D6;color:#2C322F;font-family:Roboto,sans-serif;font-size:13px;font-weight:600;padding:9px 16px;border-radius:22px;cursor:pointer">
+      <span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1;color:#00897B">restart_alt</span>Rivedi onboarding
+    </button>
+    <button onClick="{{ resetData }}" style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #D5D8D6;color:#2C322F;font-family:Roboto,sans-serif;font-size:13px;font-weight:600;padding:9px 16px;border-radius:22px;cursor:pointer">
+      <span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1;color:#757575">refresh</span>Reset dati
+    </button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:470,&quot;height&quot;:1000},&quot;fabExtended&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false}}">
+class Component extends DCLogic {
+  seed = () => ([
+    { id: 1, title: 'Comprare il latte', desc: 'Al supermercato sotto casa', radius: 200, active: true, coords: '45.4655, 9.1882' },
+    { id: 2, title: 'Ritirare il pacco in posta', desc: '', radius: 150, active: true, coords: '45.4612, 9.1934' },
+    { id: 3, title: 'Portare a spasso il cane', desc: 'Al parco', radius: 300, active: false, coords: '45.4699, 9.1850' }
+  ]);
+  state = {
+    screen: 'map', sheetOpen: false, editingId: null,
+    draft: { title: '', desc: '', radius: 200, coords: '45.4642, 9.1900' },
+    reminders: this.seed(),
+    obActive: true, obStep: 0,
+    fabExtended: this.props.fabExtended ?? false,
+    toast: null, nextId: 4
+  };
+  toastTimer = null;
+  componentWillUnmount() { clearTimeout(this.toastTimer); }
+  flash = (msg) => {
+    clearTimeout(this.toastTimer);
+    this.setState({ toast: msg });
+    this.toastTimer = setTimeout(() => this.setState({ toast: null }), 2200);
+  };
+  randCoord = () => {
+    const la = (45.4642 + (Math.random() - 0.5) * 0.012).toFixed(4);
+    const lo = (9.1900 + (Math.random() - 0.5) * 0.012).toFixed(4);
+    return `${la}, ${lo}`;
+  };
+
+  openNew = () => this.setState({ sheetOpen: true, editingId: null, draft: { title: '', desc: '', radius: 200, coords: this.randCoord() } });
+  openEdit = (id) => {
+    const r = this.state.reminders.find(x => x.id === id);
+    if (!r) return;
+    this.setState({ screen: 'list', sheetOpen: true, editingId: id, draft: { title: r.title, desc: r.desc || '', radius: r.radius, coords: r.coords || '45.4642, 9.1900' } });
+  };
+  closeSheet = () => this.setState({ sheetOpen: false });
+  setTitle = (v) => this.setState(s => ({ draft: { ...s.draft, title: v } }));
+  setDesc = (v) => this.setState(s => ({ draft: { ...s.draft, desc: v } }));
+  setRadius = (v) => this.setState(s => ({ draft: { ...s.draft, radius: v } }));
+  saveR = () => {
+    this.setState(s => {
+      const d = s.draft;
+      if (s.editingId != null) {
+        return { reminders: s.reminders.map(r => r.id === s.editingId ? { ...r, ...d } : r), sheetOpen: false };
+      }
+      const item = { id: s.nextId, title: d.title, desc: d.desc, radius: d.radius, active: true, coords: d.coords };
+      return { reminders: [...s.reminders, item], nextId: s.nextId + 1, sheetOpen: false, screen: 'list' };
+    });
+    this.flash('Promemoria salvato');
+  };
+  toggleR = (id) => this.setState(s => ({ reminders: s.reminders.map(r => r.id === id ? { ...r, active: !r.active } : r) }));
+  deleteR = (id) => { this.setState(s => ({ reminders: s.reminders.filter(r => r.id !== id) })); this.flash('Promemoria eliminato'); };
+  goTab = (t) => this.setState({ screen: t });
+
+  obNext = () => this.setState(s => s.obStep >= 2 ? { obActive: false } : { obStep: s.obStep + 1 });
+  obSkip = () => this.setState({ obActive: false });
+  restartTour = () => this.setState({ obActive: true, obStep: 0, screen: 'map', sheetOpen: false });
+  toggleFab = () => this.setState(s => ({ fabExtended: !s.fabExtended }));
+  resetData = () => { this.setState({ reminders: this.seed(), nextId: 4, screen: 'map', sheetOpen: false }); this.flash('Dati ripristinati'); };
+
+  renderVals() {
+    const s = this.state;
+    return {
+      mapScreen: s.screen === 'map', listScreen: s.screen === 'list',
+      reminders: s.reminders, fabExtended: s.fabExtended,
+      sheetOpen: s.sheetOpen,
+      draftTitle: s.draft.title, draftDesc: s.draft.desc, draftRadius: s.draft.radius, draftCoords: s.draft.coords,
+      obActive: s.obActive, obStep: s.obStep,
+      showToast: !!s.toast, toastMsg: s.toast || '',
+      fabChipLabel: s.fabExtended ? 'FAB: esteso' : 'FAB: tondo',
+      fabChipStyle: {
+        display: 'flex', alignItems: 'center', gap: '7px',
+        background: s.fabExtended ? '#00897B' : '#fff',
+        color: s.fabExtended ? '#fff' : '#2C322F',
+        border: s.fabExtended ? '1px solid #00897B' : '1px solid #D5D8D6',
+        fontFamily: 'Roboto,sans-serif', fontSize: '13px', fontWeight: 600,
+        padding: '9px 16px', borderRadius: '22px', cursor: 'pointer'
+      },
+      openNew: this.openNew, openEdit: this.openEdit, closeSheet: this.closeSheet,
+      setTitle: this.setTitle, setDesc: this.setDesc, setRadius: this.setRadius,
+      saveR: this.saveR, toggleR: this.toggleR, deleteR: this.deleteR, goTab: this.goTab,
+      obNext: this.obNext, obSkip: this.obSkip, restartTour: this.restartTour,
+      toggleFab: this.toggleFab, resetData: this.resetData
+    };
+  }
+}
+</script>
+</body>
+</html>
