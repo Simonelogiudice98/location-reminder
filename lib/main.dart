@@ -4,7 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'data/reminder_model.dart';
 import 'data/reminder_repository.dart';
-import 'features/map/map_screen.dart';
+import 'features/home/home_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +28,7 @@ class GeoReminderApp extends StatelessWidget {
           seedColor: const Color(0xFF00897B),
         ).copyWith(primary: const Color(0xFF00897B)),
       ),
-      home: const MapScreen(),
+      home: const HomeShell(),
     );
   }
 }

@@ -142,7 +142,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   Widget build(BuildContext context) {
     final reminders = ref.watch(remindersProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('GeoReminder')),
       body: GoogleMap(
         initialCameraPosition: _fallbackCamera,
         onMapCreated: (controller) {

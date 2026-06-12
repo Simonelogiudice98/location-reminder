@@ -29,6 +29,36 @@ class RemindersNotifier extends Notifier<List<Reminder>> {
     );
     state = _repository.getAllReminders();
   }
+
+  /// Applica al reminder esistente le modifiche fatte nel form.
+  Future<void> applyDraft(String id, ReminderDraft draft) async {
+    final current = state.firstWhere((r) => r.id == id);
+    // Non copyWith: deve poter azzerare la descrizione.
+    await _repository.updateReminder(Reminder(
+      id: current.id,
+      title: draft.title,
+      description: draft.description,
+      latitude: current.latitude,
+      longitude: current.longitude,
+      radius: draft.radius,
+      createdAt: current.createdAt,
+      isActive: current.isActive,
+    ));
+    state = _repository.getAllReminders();
+  }
+
+  Future<void> toggleActive(String id) async {
+    final current = state.firstWhere((r) => r.id == id);
+    await _repository.updateReminder(
+      current.copyWith(isActive: !current.isActive),
+    );
+    state = _repository.getAllReminders();
+  }
+
+  Future<void> removeReminder(String id) async {
+    await _repository.deleteReminder(id);
+    state = _repository.getAllReminders();
+  }
 }
 
 final remindersProvider =

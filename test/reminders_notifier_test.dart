@@ -72,4 +72,64 @@ void main() {
     expect(saved.isActive, isTrue);
     expect(box.get(saved.id), isNotNull);
   });
+
+  test('toggleActive inverte isActive e persiste', () async {
+    final saved = await repository.addReminder(
+      title: 'Compra latte',
+      latitude: 43.8,
+      longitude: 7.5,
+    );
+
+    await container.read(remindersProvider.notifier).toggleActive(saved.id);
+
+    expect(container.read(remindersProvider).single.isActive, isFalse);
+    expect(box.get(saved.id)!.isActive, isFalse);
+
+    await container.read(remindersProvider.notifier).toggleActive(saved.id);
+    expect(box.get(saved.id)!.isActive, isTrue);
+  });
+
+  test('removeReminder elimina dal box e dallo stato', () async {
+    final saved = await repository.addReminder(
+      title: 'Compra latte',
+      latitude: 43.8,
+      longitude: 7.5,
+    );
+
+    await container.read(remindersProvider.notifier).removeReminder(saved.id);
+
+    expect(container.read(remindersProvider), isEmpty);
+    expect(box.get(saved.id), isNull);
+  });
+
+  test('applyDraft aggiorna i campi del form e preserva il resto', () async {
+    final saved = await repository.addReminder(
+      title: 'Farmacia',
+      description: 'Ritira ricetta',
+      latitude: 44.1,
+      longitude: 8.2,
+      radius: 150,
+    );
+    await container.read(remindersProvider.notifier).toggleActive(saved.id);
+
+    // Descrizione assente nel draft: deve azzerarla (limite di copyWith).
+    const draft = ReminderDraft(
+      title: 'Farmacia comunale',
+      latitude: 44.1,
+      longitude: 8.2,
+      radius: 400,
+    );
+    await container
+        .read(remindersProvider.notifier)
+        .applyDraft(saved.id, draft);
+
+    final updated = box.get(saved.id)!;
+    expect(updated.title, 'Farmacia comunale');
+    expect(updated.description, isNull);
+    expect(updated.radius, 400);
+    expect(updated.isActive, isFalse, reason: 'lo stato attivo non si tocca');
+    expect(updated.createdAt, saved.createdAt);
+    expect(updated.latitude, saved.latitude);
+    expect(container.read(remindersProvider).single.title, 'Farmacia comunale');
+  });
 }

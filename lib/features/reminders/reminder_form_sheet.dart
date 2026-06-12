@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../data/reminder_model.dart';
+
 /// Dati raccolti dal form di creazione, non ancora persistiti.
 ///
 /// Volutamente senza dipendenze da Hive/Riverpod: è il valore di ritorno
@@ -23,17 +25,27 @@ class ReminderDraft {
   });
 }
 
-/// Bottom sheet di creazione reminder (schermata 2 del design handoff).
+/// Bottom sheet di creazione/modifica reminder (schermata 2 del design
+/// handoff).
 ///
 /// Si apre con [ReminderFormSheet.show]; ritorna il [ReminderDraft]
 /// compilato, o `null` se l'utente annulla (X, scrim, back).
+/// Con [initial] valorizzato lavora in modalità modifica: campi
+/// precompilati e posizione (sempre read-only) presa dal reminder.
 class ReminderFormSheet extends StatefulWidget {
-  const ReminderFormSheet({super.key, required this.position});
+  const ReminderFormSheet({super.key, required this.position, this.initial});
 
   /// Punto del long press: posizione read-only del reminder.
   final LatLng position;
 
-  static Future<ReminderDraft?> show(BuildContext context, LatLng position) {
+  /// Reminder da modificare; `null` in creazione.
+  final Reminder? initial;
+
+  static Future<ReminderDraft?> show(
+    BuildContext context,
+    LatLng position, {
+    Reminder? initial,
+  }) {
     return showModalBottomSheet<ReminderDraft>(
       context: context,
       isScrollControlled: true,
@@ -42,7 +54,7 @@ class ReminderFormSheet extends StatefulWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => ReminderFormSheet(position: position),
+      builder: (_) => ReminderFormSheet(position: position, initial: initial),
     );
   }
 
@@ -67,6 +79,12 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
   @override
   void initState() {
     super.initState();
+    final initial = widget.initial;
+    if (initial != null) {
+      _titleController.text = initial.title;
+      _descriptionController.text = initial.description ?? '';
+      _radius = initial.radius.clamp(_minRadius, _maxRadius).toDouble();
+    }
     // Riabilita/disabilita il bottone Salva mentre l'utente digita.
     _titleController.addListener(() => setState(() {}));
   }
@@ -134,7 +152,9 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
             children: [
               Expanded(
                 child: Text(
-                  'Nuovo promemoria',
+                  widget.initial == null
+                      ? 'Nuovo promemoria'
+                      : 'Modifica promemoria',
                   style: theme.textTheme.titleLarge
                       ?.copyWith(fontSize: 20, fontWeight: FontWeight.w600),
                 ),
