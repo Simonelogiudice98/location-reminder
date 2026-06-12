@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../core/location_service.dart';
+import '../../data/reminder_model.dart';
 import '../reminders/reminder_form_sheet.dart';
 import '../reminders/reminders_providers.dart';
 
@@ -34,10 +35,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   /// Pin del long press, visibile mentre il form di creazione è aperto.
   LatLng? _pendingPin;
-
-  /// Draft salvati dal form ma non ancora persistiti (T5 li sposterà su
-  /// Riverpod+Hive): vivono solo in memoria e spariscono al riavvio.
-  final List<ReminderDraft> _unsavedDrafts = [];
 
   @override
   void initState() {
@@ -108,19 +105,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final draft = await ReminderFormSheet.show(context, position);
     if (!mounted) return;
 
-    setState(() {
-      _pendingPin = null;
-      if (draft != null) _unsavedDrafts.add(draft);
-    });
     if (draft != null) {
+      await ref.read(remindersProvider.notifier).addFromDraft(draft);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Promemoria salvato')),
       );
     }
+    setState(() => _pendingPin = null);
   }
 
-  Set<Marker> _buildMarkers() {
-    final reminders = ref.read(reminderRepositoryProvider).getAllReminders();
+  Set<Marker> _buildMarkers(List<Reminder> reminders) {
     final pendingPin = _pendingPin;
     return {
       for (final reminder in reminders)
@@ -130,15 +125,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           infoWindow: InfoWindow(
             title: reminder.title,
             snippet: reminder.description,
-          ),
-        ),
-      for (final (index, draft) in _unsavedDrafts.indexed)
-        Marker(
-          markerId: MarkerId('draft-$index'),
-          position: LatLng(draft.latitude, draft.longitude),
-          infoWindow: InfoWindow(
-            title: draft.title,
-            snippet: draft.description,
           ),
         ),
       if (pendingPin != null)
@@ -154,6 +140,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final reminders = ref.watch(remindersProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('GeoReminder')),
       body: GoogleMap(
@@ -162,7 +149,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           _mapController = controller;
           _animateToUser();
         },
-        markers: _buildMarkers(),
+        markers: _buildMarkers(reminders),
         onLongPress: _onMapLongPress,
         myLocationEnabled: _locationGranted,
         myLocationButtonEnabled: _locationGranted,
