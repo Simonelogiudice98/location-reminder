@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
+import '../../data/reminder_draft.dart';
 import '../../data/reminder_model.dart';
 import '../../data/reminder_repository.dart';
-import 'reminder_form_sheet.dart';
 
 /// Repository dei reminder, costruito sul box Hive aperto in `main()`.
 final reminderRepositoryProvider = Provider<ReminderRepository>((ref) {

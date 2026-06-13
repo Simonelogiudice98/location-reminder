@@ -83,38 +83,55 @@ class RemindersListScreen extends ConsumerWidget {
     );
   }
 
+  Widget _sectionHeader(String label) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.4,
+            color: Color(0xFF9AA0A6),
+          ),
+        ),
+      );
+
+  List<Widget> _section(
+    BuildContext context,
+    WidgetRef ref,
+    String label,
+    List<Reminder> reminders,
+  ) {
+    if (reminders.isEmpty) return const [];
+    return [
+      _sectionHeader(label),
+      const SizedBox(height: 8),
+      for (final reminder in reminders) ...[
+        ReminderCard(
+          reminder: reminder,
+          onToggle: () =>
+              ref.read(remindersProvider.notifier).toggleActive(reminder.id),
+          onEdit: () => _editReminder(context, ref, reminder),
+          onDelete: () =>
+              ref.read(remindersProvider.notifier).removeReminder(reminder.id),
+        ),
+        const SizedBox(height: 12),
+      ],
+    ];
+  }
+
   Widget _buildList(
     BuildContext context,
     WidgetRef ref,
     List<Reminder> reminders,
   ) {
+    final active = reminders.where((r) => r.isActive).toList();
+    final inactive = reminders.where((r) => !r.isActive).toList();
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 2, vertical: 4),
-          child: Text(
-            'ATTIVI',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.4,
-              color: Color(0xFF9AA0A6),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        for (final reminder in reminders) ...[
-          ReminderCard(
-            reminder: reminder,
-            onToggle: () =>
-                ref.read(remindersProvider.notifier).toggleActive(reminder.id),
-            onEdit: () => _editReminder(context, ref, reminder),
-            onDelete: () =>
-                ref.read(remindersProvider.notifier).removeReminder(reminder.id),
-          ),
-          const SizedBox(height: 12),
-        ],
+        ..._section(context, ref, 'ATTIVI', active),
+        ..._section(context, ref, 'INATTIVI', inactive),
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 8),
           child: Row(

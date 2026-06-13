@@ -19,7 +19,7 @@ class ReminderCard extends StatelessWidget {
 
   final Reminder reminder;
   final VoidCallback onToggle;
-  final VoidCallback onEdit;
+  final Future<void> Function() onEdit;
   final VoidCallback onDelete;
 
   static const _deleteColor = Color(0xFFE5484D);
@@ -28,6 +28,7 @@ class ReminderCard extends StatelessWidget {
   Future<bool?> _confirmDelete(BuildContext context) {
     return showDialog<bool>(
       context: context,
+      useRootNavigator: true,
       builder: (context) => AlertDialog(
         title: const Text('Eliminare il promemoria?'),
         content: Text('"${reminder.title}" verrà eliminato definitivamente.'),
@@ -96,7 +97,7 @@ class ReminderCard extends StatelessWidget {
       ),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
-          onEdit();
+          await onEdit();
         } else if (await _confirmDelete(context) ?? false) {
           onDelete();
         }

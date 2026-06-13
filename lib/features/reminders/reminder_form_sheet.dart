@@ -1,29 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../data/reminder_draft.dart';
 import '../../data/reminder_model.dart';
-
-/// Dati raccolti dal form di creazione, non ancora persistiti.
-///
-/// Volutamente senza dipendenze da Hive/Riverpod: è il valore di ritorno
-/// del bottom sheet e diventerà l'input di `ReminderRepository.addReminder`.
-class ReminderDraft {
-  final String title;
-  final String? description;
-  final double latitude;
-  final double longitude;
-
-  /// Raggio di attivazione in metri.
-  final double radius;
-
-  const ReminderDraft({
-    required this.title,
-    this.description,
-    required this.latitude,
-    required this.longitude,
-    required this.radius,
-  });
-}
 
 /// Bottom sheet di creazione/modifica reminder (schermata 2 del design
 /// handoff).
@@ -50,7 +29,8 @@ class ReminderFormSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Colors.white,
+      useRootNavigator: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -260,6 +240,7 @@ class _ReminderFormSheetState extends State<ReminderFormSheet> {
             value: _radius,
             min: _minRadius,
             max: _maxRadius,
+            // 19 intervalli = 20 posizioni: 50, 100, …, 1000 m.
             divisions: 19,
             onChanged: (value) => setState(() => _radius = value),
           ),

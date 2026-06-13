@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/geofence_service.dart';
 import '../../core/location_service.dart';
 import '../../core/notification_service.dart';
 import '../map/map_screen.dart';

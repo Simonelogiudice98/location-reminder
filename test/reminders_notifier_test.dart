@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:georeminder/data/reminder_model.dart';
 import 'package:georeminder/data/reminder_repository.dart';
-import 'package:georeminder/features/reminders/reminder_form_sheet.dart';
+import 'package:georeminder/data/reminder_draft.dart';
 import 'package:georeminder/features/reminders/reminders_providers.dart';
 import 'package:hive/hive.dart';
 

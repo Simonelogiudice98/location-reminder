@@ -31,9 +31,10 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.simone.georeminder"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // minSdk fissato esplicitamente: floor richiesto da geolocator e
+        // flutter_local_notifications (>=21), 23 per il modello a permessi
+        // runtime. Da non lasciare al default del template.
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

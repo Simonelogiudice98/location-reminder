@@ -36,6 +36,7 @@ class GeoReminderApp extends StatelessWidget {
     return MaterialApp(
       title: 'GeoReminder',
       theme: ThemeData(
+        useMaterial3: true,
         // Il seed da solo genera un tonal palette diverso dal design system:
         // forziamo il primary al teal #00897B della spec.
         colorScheme: ColorScheme.fromSeed(

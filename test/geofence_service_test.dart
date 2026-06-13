@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:georeminder/core/notification_service.dart';
+import 'package:georeminder/core/geofence_service.dart';
 import 'package:georeminder/data/reminder_model.dart';
 
 /// Posizione fittizia per i test: contano solo lat/lng.
