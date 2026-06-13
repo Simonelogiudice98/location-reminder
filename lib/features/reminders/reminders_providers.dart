@@ -32,7 +32,9 @@ class RemindersNotifier extends Notifier<List<Reminder>> {
 
   /// Applica al reminder esistente le modifiche fatte nel form.
   Future<void> applyDraft(String id, ReminderDraft draft) async {
-    final current = state.firstWhere((r) => r.id == id);
+    final index = state.indexWhere((r) => r.id == id);
+    if (index == -1) return;
+    final current = state[index];
     // Non copyWith: deve poter azzerare la descrizione.
     await _repository.updateReminder(Reminder(
       id: current.id,
@@ -48,7 +50,9 @@ class RemindersNotifier extends Notifier<List<Reminder>> {
   }
 
   Future<void> toggleActive(String id) async {
-    final current = state.firstWhere((r) => r.id == id);
+    final index = state.indexWhere((r) => r.id == id);
+    if (index == -1) return;
+    final current = state[index];
     await _repository.updateReminder(
       current.copyWith(isActive: !current.isActive),
     );

@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
 /// Esito di una richiesta di posizione.
@@ -63,3 +64,8 @@ class LocationService {
   /// Apre le impostazioni dell'app, per il caso [permissionDeniedForever].
   Future<void> openAppSettings() => Geolocator.openAppSettings();
 }
+
+/// Servizio di localizzazione condiviso tra mappa e controllo di prossimità.
+final locationServiceProvider = Provider<LocationService>(
+  (ref) => LocationService(),
+);

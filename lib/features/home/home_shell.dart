@@ -31,12 +31,15 @@ class _HomeShellState extends ConsumerState<HomeShell> {
 
   Future<void> _checkProximity() async {
     final result = await ref.read(locationServiceProvider).getCurrentPosition();
+    if (!mounted) return;
     if (result is! LocationSuccess) return; // failure: la mappa già lo segnala
     final matched = remindersInRange(
       result.position,
       ref.read(remindersProvider),
     );
+    if (!mounted) return;
     await ref.read(notificationServiceProvider).showNearby(matched);
+    if (!mounted) return; // guardia anche dopo l'ultimo await (difensiva)
   }
 
   @override

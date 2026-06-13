@@ -9,10 +9,6 @@ import '../../data/reminder_model.dart';
 import '../reminders/reminder_form_sheet.dart';
 import '../reminders/reminders_providers.dart';
 
-final locationServiceProvider = Provider<LocationService>(
-  (ref) => LocationService(),
-);
-
 /// Schermata principale: mappa centrata sull'utente con i pin dei reminder.
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
