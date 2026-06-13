@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'core/notification_service.dart';
 import 'data/reminder_model.dart';
 import 'data/reminder_repository.dart';
 import 'features/home/home_shell.dart';
@@ -11,7 +12,20 @@ Future<void> main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(ReminderAdapter());
   await Hive.openBox<Reminder>(ReminderRepository.boxName);
-  runApp(const ProviderScope(child: GeoReminderApp()));
+
+  // Inizializza le notifiche prima di runApp così sono pronte per il
+  // controllo di prossimità all'apertura (HomeShell).
+  final notificationService = NotificationService();
+  await notificationService.init();
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        notificationServiceProvider.overrideWithValue(notificationService),
+      ],
+      child: const GeoReminderApp(),
+    ),
+  );
 }
 
 class GeoReminderApp extends StatelessWidget {

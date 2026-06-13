@@ -3,6 +3,8 @@
          solo in Fase 2 con il geofencing. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <!-- Notifiche locali (Android 13+ richiede anche il consenso runtime). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:label="georeminder"
         android:name="${applicationName}"
